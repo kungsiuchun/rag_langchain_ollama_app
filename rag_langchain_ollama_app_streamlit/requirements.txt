@@ -1,0 +1,28 @@
+# Core
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+langchain-text-splitters>=0.3.0
+langchain-ollama>=0.3.0
+langchain-chroma>=0.1.0
+chromadb>=0.5.0
+pydantic>=2.6
+python-dotenv>=1.0
+rich>=13.7
+fastapi>=0.110
+uvicorn>=0.27
+streamlit>=1.30
+
+# Token-based splitting support
+tiktoken>=0.7.0
+
+# Optional: semantic chunking
+langchain-experimental>=0.3.0
+
+# Optional: GraphRAG
+neo4j>=5.20
+
+# Optional: Evaluation
+ragas>=0.2.0
+datasets>=2.19
+pandas>=2.1
