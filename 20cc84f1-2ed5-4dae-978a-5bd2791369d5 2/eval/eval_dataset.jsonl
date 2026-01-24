@@ -1,0 +1,2 @@
+{"user_input":"What is Retrieval Augmented Generation (RAG)?","reference":"RAG is a technique that integrates external data sources into an LLM to overcome limited built-in knowledge by retrieving relevant context before generation."}
+{"user_input":"Name two splitting methods mentioned in the course description.","reference":"Token-based splitting and semantic splitting are both mentioned (as well as code-aware splitting for Python/Markdown)."}
