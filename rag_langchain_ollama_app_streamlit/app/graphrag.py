@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 
 """Optional GraphRAG (Neo4j) demo.
 
@@ -56,18 +57,52 @@ def graph_answer(question: str) -> str:
     _require_neo4j()
 
     from langchain_community.graphs import Neo4jGraph
-    from langchain.chains import GraphCypherQAChain
+    from langchain_community.chains.graph_qa.cypher import GraphCypherQAChain
+    from langchain_core.prompts import PromptTemplate
 
     llm = OllamaLLM(model=settings.llm_model, base_url=settings.ollama_base_url)
+
+
+
     graph = Neo4jGraph(
         url=settings.neo4j_uri,
         username=settings.neo4j_username,
         password=settings.neo4j_password,
+        refresh_schema=False
     )
 
-    chain = GraphCypherQAChain.from_llm(llm, graph=graph, verbose=False)
+
+    CYPHER_PROMPT = PromptTemplate.from_template("""
+    You are generating Cypher for Neo4j.
+
+    Rules:
+    - DO NOT use n.label or any property called 'label' unless it exists in schema.
+    - To get node labels, use labels(n) or CALL db.labels().
+    - To get relationship types, use type(r) or CALL db.relationshipTypes().
+
+    Schema:
+    {schema}
+
+    Question:
+    {question}
+
+    Return ONLY the Cypher query.
+    """)
+
+    chain = GraphCypherQAChain.from_llm(
+        llm=llm,
+        graph=graph,
+        cypher_prompt=CYPHER_PROMPT,
+        allow_dangerous_requests=True,
+        verbose=True,
+        return_intermediate_steps=True,
+    )
+
     result = chain.invoke({"query": question})
-    return str(result.get("result", result))
+    print(result.get("intermediate_steps"))
+    print(result.get("result"))
+    return result.get("result", "")
+
 
 
 def query_graph(question: str):

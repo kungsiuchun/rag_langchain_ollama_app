@@ -14,10 +14,15 @@ def get_or_create_chroma(collection_name: str, persist_directory: str, embedding
     )
 
 
+
 def reset_collection(vs: Chroma):
-    vs._collection.delete(where={})
+    # 1) delete collection
+    vs.delete_collection()
+
+    # 2) re-create / initialize collection on same instance
+    getattr(vs, "_Chroma__ensure_collection")()
+
 
 
 def add_documents(vs: Chroma, docs: List[Document]):
     vs.add_documents(docs)
-    vs.persist()

@@ -34,8 +34,9 @@ ollama pull nomic-embed-text
 ## 1) Install
 
 ```bash
-python -m venv .venv
+/opt/homebrew/bin/python3.11 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
+conda deactivate
 pip install -r requirements.txt
 ```
 

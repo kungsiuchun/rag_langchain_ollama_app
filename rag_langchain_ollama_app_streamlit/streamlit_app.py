@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import streamlit as st
-
+import os
 from langchain_ollama.llms import OllamaLLM
 from langchain_ollama import OllamaEmbeddings
 
@@ -10,12 +10,16 @@ from app.vectorstore import get_or_create_chroma
 from app.rag_chain import build_rag_chain
 from app.build_index import build_index
 
+
 # Optional GraphRAG
+graphrag_import_error = None
 try:
     from app.graphrag import graph_answer, ingest_to_graph
-except Exception:
+except Exception as e:
     graph_answer = None
     ingest_to_graph = None
+    graphrag_import_error = str(e)
+
 
 
 st.set_page_config(page_title="Local RAG + GraphRAG (Ollama)", layout="wide")
@@ -54,6 +58,11 @@ with st.sidebar:
     mode = st.radio("Mode", ["Vector RAG", "GraphRAG (Neo4j)"], index=0)
     st.session_state.mode = mode
 
+
+    st.sidebar.write("cwd:", os.getcwd())
+    st.sidebar.write("knowledge_base exists:", os.path.exists("./knowledge_base"))
+
+
     st.divider()
     st.subheader("Indexing")
     source_dir = st.text_input("Knowledge base folder", value="./knowledge_base")
@@ -78,8 +87,12 @@ with st.sidebar:
         if st.button("Ingest docs into Neo4j graph", use_container_width=True):
             if ingest_to_graph is None:
                 st.error("GraphRAG module unavailable")
+                if graphrag_import_error:
+                    st.code(graphrag_import_error)
+
             else:
                 with st.status("Ingesting into Neo4j...", expanded=True):
+                    st.write("Ingesting from:", source_dir)
                     ingest_to_graph(source_dir)
                     st.success("Graph ingestion complete")
 
@@ -121,6 +134,9 @@ if prompt:
             if graph_answer is None:
                 answer = "GraphRAG is not available in this environment."
                 st.error(answer)
+                if graphrag_import_error:
+                    st.code(graphrag_import_error)
+
             else:
                 try:
                     with st.status("Querying Neo4j graph...", expanded=False):
